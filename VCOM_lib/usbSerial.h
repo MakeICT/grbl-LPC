@@ -77,7 +77,7 @@ void VCOM_gets_echo(char *str); // gets string terminated in '\r' or '\n' and ec
 #include "usbapi.h"
 #include "usbdebug.h"
 
-#define BAUD_RATE	115200
+#define BAUD_RATE	921600
 
 #define INT_IN_EP		0x81
 #define BULK_OUT_EP		0x05
