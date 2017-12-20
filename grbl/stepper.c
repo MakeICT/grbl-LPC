@@ -347,6 +347,13 @@ extern "C" void TIMER1_IRQHandler()
     if (segment_buffer_head != segment_buffer_tail) {
       // Initialize new step segment and load number of steps to execute
       st.exec_segment = &segment_buffer[segment_buffer_tail];
+      
+      #ifdef VARIABLE_SPINDLE
+      // Set real-time spindle output as segment is loaded, just prior to the first step.
+      // Changed to see if starting before calculations affects the delay experienced at MakeICT
+      // Frankly, it should NOT
+	spindle_set_speed(st.exec_segment->spindle_pwm);
+      #endif
 
       #ifndef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
         #error not ported; AMASS is required
@@ -361,7 +368,7 @@ extern "C" void TIMER1_IRQHandler()
       // NOTE: When the segment data index changes, this indicates a new planner block.
       if ( st.exec_block_index != st.exec_segment->st_block_index ) {
         st.exec_block_index = st.exec_segment->st_block_index;
-        st.exec_block = &st_block_buffer[st.exec_block_index];
+        st.exec_block = &st_block_buffer[st.exec_block 	_index];
 
         // Initialize Bresenham line and distance counters
         st.counter_x = st.counter_y = st.counter_z = (st.exec_block->step_event_count >> 1);
@@ -378,10 +385,7 @@ extern "C" void TIMER1_IRQHandler()
         //st.steps[C_AXIS] = st.exec_block->steps[C_AXIS] >> st.exec_segment->amass_level;
       #endif
 
-      #ifdef VARIABLE_SPINDLE
-        // Set real-time spindle output as segment is loaded, just prior to the first step.
-        spindle_set_speed(st.exec_segment->spindle_pwm);
-      #endif
+
 
     } else {
       // Reset stepping pins after delay
